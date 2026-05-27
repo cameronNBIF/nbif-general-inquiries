@@ -1,6 +1,6 @@
 from azure.identity import ClientSecretCredential
 
-from function_app import AZURE_CLIENT_ID, AZURE_CLIENT_SECRET, AZURE_TENANT_ID, GRAPH_SCOPE
+from config import AZURE_CLIENT_ID, AZURE_CLIENT_SECRET, AZURE_TENANT_ID, GRAPH_SCOPE
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Microsoft Graph — Authentication

@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta, timezone
 from urllib import request
 
-from function_app import GRAPH_BASE
+from config import GRAPH_BASE
 from microsoft_graph.authentication import graph_headers
 
 # ─────────────────────────────────────────────────────────────────────────────
