@@ -1,5 +1,12 @@
-# Uncomment to enable Azure Monitor OpenTelemetry
-# Ref: aka.ms/functions-azure-monitor-python 
-# azure-monitor-opentelemetry 
-
+# Azure Functions runtime
 azure-functions
+
+# Azure Table Storage client — used for conversationId deduplication
+# and storing the Graph subscription ID
+azure-data-tables
+
+# Azure Identity — provides ClientSecretCredential for Graph OAuth token acquisition
+azure-identity
+
+# HTTP client — used for all Graph API and Affinity API calls
+requests
