@@ -1,7 +1,7 @@
 import re
 from urllib import request
 
-from function_app import GRAPH_BASE, GRAPH_USER_EMAIL
+from config import GRAPH_BASE, GRAPH_USER_EMAIL
 from microsoft_graph.authentication import graph_headers
 
 # ─────────────────────────────────────────────────────────────────────────────

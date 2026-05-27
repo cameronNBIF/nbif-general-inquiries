@@ -2,7 +2,7 @@ import logging
 
 from affinity.affinity import create_list_entry, populate_affinity_entry, resolve_or_create_person
 from azure_table_storage.azure_table_storage import conversation_exists, store_conversation
-from function_app import FORM_SUBJECT_PREFIX
+from config import FORM_SUBJECT_PREFIX
 from microsoft_graph.mail import fetch_message, parse_body, split_display_name
 
 logger = logging.getLogger(__name__)

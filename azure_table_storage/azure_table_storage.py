@@ -1,7 +1,7 @@
 from azure.data.tables import TableClient
 from azure.core.exceptions import ResourceNotFoundError
 
-from function_app import STORAGE_CONNECTION_STRING, STORAGE_TABLE_NAME, TABLE_PARTITION_KEY
+from config import STORAGE_CONNECTION_STRING, STORAGE_TABLE_NAME, TABLE_PARTITION_KEY
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Azure Table Storage
