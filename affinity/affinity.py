@@ -16,13 +16,25 @@ def affinity_auth() -> tuple[str, str]:
 
 def resolve_or_create_person(first_name: str, last_name: str, email: str) -> int:
     """
-    Attempt to create a new Person in Affinity. If the email address already
-    exists in the organization's Affinity database, the API returns the
-    existing person record rather than creating a duplicate.
-
-    Returns the numeric Affinity person ID.
+    Attempt to find an existing Person in Affinity by their email. 
+    If they do not exist, create a new Person.
     """
-    resp = requests.post(
+    # 1. Search for the person by email
+    search_resp = requests.get(
+        f"{AFFINITY_BASE}/persons",
+        params={"term": email},
+        auth=affinity_auth(),
+    )
+    search_resp.raise_for_status()
+    
+    # Affinity's search endpoint returns an array of matching person records
+    search_results = search_resp.json()
+    if search_results and len(search_results) > 0:
+        # Person already exists, return their Affinity ID
+        return search_results[0]["id"]
+        
+    # 2. If the search comes back empty, they are new — create them
+    create_resp = requests.post(
         f"{AFFINITY_BASE}/persons",
         json={
             "first_name": first_name,
@@ -31,8 +43,8 @@ def resolve_or_create_person(first_name: str, last_name: str, email: str) -> int
         },
         auth=affinity_auth(),
     )
-    resp.raise_for_status()
-    return resp.json()["id"]
+    create_resp.raise_for_status()
+    return create_resp.json()["id"]
 
 
 def create_list_entry(person_id: int) -> int:
