@@ -1,5 +1,5 @@
 import re
-from urllib import request
+import requests
 
 from config import GRAPH_BASE, GRAPH_USER_EMAIL
 from microsoft_graph.authentication import graph_headers
@@ -21,7 +21,7 @@ def fetch_message(token: str, message_id: str) -> dict:
         f"/messages/{message_id}"
         f"?$select={select_fields}"
     )
-    resp = request.get(url, headers=graph_headers(token))
+    resp = requests.get(url, headers=graph_headers(token))
     resp.raise_for_status()
     return resp.json()
 

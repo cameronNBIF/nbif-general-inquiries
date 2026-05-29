@@ -1,6 +1,6 @@
-from datetime import datetime, timedelta, timezone
-from urllib import request
+import requests
 
+from datetime import datetime, timedelta, timezone
 from config import GRAPH_BASE
 from microsoft_graph.authentication import graph_headers
 
@@ -20,7 +20,7 @@ def renew_graph_subscription(token: str, subscription_id: str) -> str:
     ).strftime("%Y-%m-%dT%H:%M:%S.000Z")
 
     url = f"{GRAPH_BASE}/subscriptions/{subscription_id}"
-    resp = request.patch(
+    resp = requests.patch(
         url,
         json={"expirationDateTime": new_expiry},
         headers=graph_headers(token),
