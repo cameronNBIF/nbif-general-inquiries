@@ -1,4 +1,4 @@
-from config import AFFINITY_API_KEY, AFFINITY_BASE, AFFINITY_FIELD_IDS, AFFINITY_LIST_ID
+from config import AFFINITY_API_KEY, AFFINITY_BASE, AFFINITY_FIELD_IDS, AFFINITY_LIST_ID, AFFINITY_STATUS_NEW_ID
 
 import requests
 
@@ -88,4 +88,4 @@ def populate_affinity_entry(
     set_field_value(person_id, list_entry_id, AFFINITY_FIELD_IDS["date_received"], received_at)
     set_field_value(person_id, list_entry_id, AFFINITY_FIELD_IDS["source"],        source)
     set_field_value(person_id, list_entry_id, AFFINITY_FIELD_IDS["thread_id"],     conversation_id)
-    set_field_value(person_id, list_entry_id, AFFINITY_FIELD_IDS["status"],        "New")
+    set_field_value(person_id, list_entry_id, AFFINITY_FIELD_IDS["status"], int(AFFINITY_STATUS_NEW_ID))
