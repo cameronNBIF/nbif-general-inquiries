@@ -18,6 +18,8 @@ def resolve_or_create_person(first_name: str, last_name: str, email: str) -> int
     """
     Attempt to find an existing Person in Affinity by their email. 
     If they do not exist, create a new Person.
+
+    Returns the numeric Affinity person ID.
     """
     # 1. Search for the person by email
     search_resp = requests.get(
@@ -27,13 +29,17 @@ def resolve_or_create_person(first_name: str, last_name: str, email: str) -> int
     )
     search_resp.raise_for_status()
     
-    # Affinity's search endpoint returns an array of matching person records
-    search_results = search_resp.json()
-    if search_results and len(search_results) > 0:
-        # Person already exists, return their Affinity ID
-        return search_results[0]["id"]
+    # Safely parse the JSON response
+    search_data = search_resp.json()
+    
+    # Affinity wraps list responses in a dictionary under the "persons" key
+    persons_list = search_data.get("persons", [])
+    
+    # 2. If a match is found, return the existing ID
+    if persons_list and len(persons_list) > 0:
+        return persons_list[0]["id"]
         
-    # 2. If the search comes back empty, they are new — create them
+    # 3. If the search comes back empty, they are new — create them
     create_resp = requests.post(
         f"{AFFINITY_BASE}/persons",
         json={
