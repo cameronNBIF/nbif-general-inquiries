@@ -60,13 +60,15 @@ def process_notification(token: str, message_id: str) -> None:
     first_name, last_name = split_display_name(sender_name)
     person_id     = resolve_or_create_person(first_name, last_name, sender_email)
     list_entry_id = create_list_entry(person_id)
-    populate_affinity_entry(person_id, list_entry_id, body_text, received_at, source, conversation_id)
+
+    # If field population fails, the entry exists in Affinity and future
+    # notifications for this thread won't create duplicates.
+    store_conversation(conversation_id, sender_email, received_at)
+    logger.info("conversationId %s stored in Table Storage.", conversation_id)
+
+    populate_affinity_entry(list_entry_id, body_text, received_at, source, conversation_id)
 
     logger.info(
         "Affinity entry created | list_entry_id: %s | person: %s %s <%s> | source: %s",
         list_entry_id, first_name, last_name, sender_email, source,
     )
-
-    # Step 6 — Persist conversationId
-    store_conversation(conversation_id, sender_email, received_at)
-    logger.info("conversationId %s stored in Table Storage.", conversation_id)
