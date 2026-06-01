@@ -4,5 +4,6 @@ local.settings.json
 .env.register
 __pycache__
 .venv
+tools/
 **/__pycache__
 **/.python_packages
