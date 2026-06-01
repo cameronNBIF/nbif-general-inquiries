@@ -66,7 +66,7 @@ def process_notification(token: str, message_id: str) -> None:
     store_conversation(conversation_id, sender_email, received_at)
     logger.info("conversationId %s stored in Table Storage.", conversation_id)
 
-    populate_affinity_entry(list_entry_id, body_text, received_at, source, conversation_id)
+    populate_affinity_entry(person_id, list_entry_id, body_text, received_at, source, conversation_id)
 
     logger.info(
         "Affinity entry created | list_entry_id: %s | person: %s %s <%s> | source: %s",
