@@ -22,9 +22,6 @@ from dotenv import load_dotenv  # reads from local.settings.json equivalent
 
 load_dotenv(".env.register")   # see note below on creating this file
 
-print("TENANT ID:", repr(os.environ.get("AZURE_TENANT_ID")))
-print("CLIENT ID:", repr(os.environ.get("AZURE_CLIENT_ID")))
-
 AZURE_CLIENT_ID           = os.environ["AZURE_CLIENT_ID"]
 AZURE_TENANT_ID           = os.environ["AZURE_TENANT_ID"]
 AZURE_CLIENT_SECRET       = os.environ["AZURE_CLIENT_SECRET"]
@@ -90,4 +87,3 @@ table_client.upsert_entity({
 })
 
 print(f"Subscription ID written to Table Storage.")
-print("Step 7 complete — the webhook is live.")

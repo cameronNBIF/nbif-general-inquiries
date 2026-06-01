@@ -1,3 +1,4 @@
+import html
 import re
 import requests
 
@@ -39,10 +40,11 @@ def parse_body(content: str, content_type: str) -> str:
     can be added to requirements.txt for more robust parsing.
     """
     if content_type.lower() == "html":
-        text = re.sub(r"<[^>]+>", " ", content)   # replace tags with spaces
-        text = re.sub(r"\s+", " ", text)           # collapse whitespace runs
+        text = re.sub(r"<[^>]+>", " ", content)
+        text = html.unescape(text)              # &nbsp; → space, &amp; → &, etc.
+        text = re.sub(r"\s+", " ", text)
         return text.strip()
-    return content.strip()
+    return html.unescape(content).strip()
 
 
 def split_display_name(display_name: str) -> tuple[str, str]:
