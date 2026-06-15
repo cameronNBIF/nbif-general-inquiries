@@ -7,6 +7,7 @@ from config import STORAGE_CONNECTION_STRING, STORAGE_TABLE_NAME, TABLE_PARTITIO
 # Azure Table Storage
 # ─────────────────────────────────────────────────────────────────────────────
 
+
 def get_table_client() -> TableClient:
     return TableClient.from_connection_string(
         conn_str=STORAGE_CONNECTION_STRING,
@@ -32,7 +33,9 @@ def conversation_exists(conversation_id: str) -> bool:
         return False
 
 
-def store_conversation(conversation_id: str, sender_email: str, received_at: str) -> None:
+def store_conversation(
+    conversation_id: str, sender_email: str, received_at: str
+) -> None:
     """
     Persist a new conversationId row after a successful Affinity entry creation.
     Uses upsert (insert-or-replace) so re-processing the same message ID from
@@ -40,9 +43,9 @@ def store_conversation(conversation_id: str, sender_email: str, received_at: str
     """
     entity = {
         "PartitionKey": TABLE_PARTITION_KEY,
-        "RowKey":       conversation_id,
-        "SenderEmail":  sender_email,
-        "ReceivedAt":   received_at,
+        "RowKey": conversation_id,
+        "SenderEmail": sender_email,
+        "ReceivedAt": received_at,
     }
     get_table_client().upsert_entity(entity=entity)
 
@@ -67,7 +70,7 @@ def store_value(row_key: str, value: str) -> None:
     """Store a simple key-value row — used to persist the Graph subscription ID."""
     entity = {
         "PartitionKey": TABLE_PARTITION_KEY,
-        "RowKey":       row_key,
-        "Value":        value,
+        "RowKey": row_key,
+        "Value": value,
     }
     get_table_client().upsert_entity(entity=entity)

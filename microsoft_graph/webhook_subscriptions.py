@@ -8,6 +8,7 @@ from microsoft_graph.authentication import graph_headers
 # Microsoft Graph — Webhook Subscriptions
 # ─────────────────────────────────────────────────────────────────────────────
 
+
 def renew_graph_subscription(token: str, subscription_id: str) -> str:
     """
     Extend the Graph webhook subscription's expiry by the maximum allowed
@@ -15,9 +16,9 @@ def renew_graph_subscription(token: str, subscription_id: str) -> str:
 
     Returns the new expiration datetime string for logging.
     """
-    new_expiry = (
-        datetime.now(timezone.utc) + timedelta(days=3)
-    ).strftime("%Y-%m-%dT%H:%M:%S.000Z")
+    new_expiry = (datetime.now(timezone.utc) + timedelta(days=3)).strftime(
+        "%Y-%m-%dT%H:%M:%S.000Z"
+    )
 
     url = f"{GRAPH_BASE}/subscriptions/{subscription_id}"
     resp = requests.patch(

@@ -10,3 +10,7 @@ azure-identity
 
 # HTTP client — used for all Graph API and Affinity API calls
 requests
+
+# Linting and formatting tools
+flake8
+black

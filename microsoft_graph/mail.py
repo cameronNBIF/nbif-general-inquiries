@@ -9,6 +9,7 @@ from microsoft_graph.authentication import graph_headers
 # Microsoft Graph — Mail
 # ─────────────────────────────────────────────────────────────────────────────
 
+
 def fetch_message(token: str, message_id: str) -> dict:
     """
     Fetch a single message from the info@nbif.ca mailbox using its Graph message ID.
@@ -41,7 +42,7 @@ def parse_body(content: str, content_type: str) -> str:
     """
     if content_type.lower() == "html":
         text = re.sub(r"<[^>]+>", " ", content)
-        text = html.unescape(text)              # &nbsp; → space, &amp; → &, etc.
+        text = html.unescape(text)  # &nbsp; → space, &amp; → &, etc.
         text = re.sub(r"\s+", " ", text)
         return text.strip()
     return html.unescape(content).strip()
@@ -52,18 +53,23 @@ def parse_form_submission(body_text: str) -> dict | None:
     Extract Name, Email, and Message from a Squarespace form submission body.
     Returns a dict with keys 'name', 'email', 'message', or None if parsing fails.
     """
-    name_match    = re.search(r"Name:\s*(.+?)(?=Email:|$)",   body_text, re.IGNORECASE | re.DOTALL)
-    email_match   = re.search(r"Email:\s*(\S+)",              body_text, re.IGNORECASE)
-    message_match = re.search(r"Message:\s*(.+?)(?=Sent via|$)", body_text, re.IGNORECASE | re.DOTALL)
+    name_match = re.search(
+        r"Name:\s*(.+?)(?=Email:|$)", body_text, re.IGNORECASE | re.DOTALL
+    )
+    email_match = re.search(r"Email:\s*(\S+)", body_text, re.IGNORECASE)
+    message_match = re.search(
+        r"Message:\s*(.+?)(?=Sent via|$)", body_text, re.IGNORECASE | re.DOTALL
+    )
 
     if not (name_match and email_match and message_match):
         return None
 
     return {
-        "name":    name_match.group(1).strip(),
-        "email":   email_match.group(1).strip(),
+        "name": name_match.group(1).strip(),
+        "email": email_match.group(1).strip(),
         "message": message_match.group(1).strip(),
     }
+
 
 def split_display_name(display_name: str) -> tuple[str, str]:
     """
@@ -72,5 +78,5 @@ def split_display_name(display_name: str) -> tuple[str, str]:
     """
     parts = display_name.strip().split(" ", 1)
     first = parts[0] if parts else ""
-    last  = parts[1] if len(parts) > 1 else ""
+    last = parts[1] if len(parts) > 1 else ""
     return first, last
