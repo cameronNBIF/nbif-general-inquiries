@@ -103,7 +103,6 @@ def graph_webhook(req: func.HttpRequest) -> func.HttpResponse:
 
     return func.HttpResponse(status_code=200)
 
-
 # ─────────────────────────────────────────────────────────────────────────────
 # Azure Function 2 — renewSubscription (Timer Trigger)
 # ─────────────────────────────────────────────────────────────────────────────
@@ -124,19 +123,19 @@ def renew_subscription(timer: func.TimerRequest) -> None:
     scheduled run or a manual retry before the subscription expires and
     notifications stop.
 
-    The subscription ID is read from Table Storage (stored there during Step 7).
+    The subscription ID is read from Table Storage.
     If the ID is missing (subscription not yet registered) or the subscription
     is not found on Graph (it already expired), a clear error is logged to
     Application Insights so the issue can be diagnosed and resolved quickly.
     """
     logger.info("renewSubscription timer fired.")
 
-    # Retrieve the subscription ID written to Table Storage in Step 7.
+    # Retrieve the subscription ID written to Table Storage.
     subscription_id = get_stored_value(SUBSCRIPTION_ROW_KEY)
     if not subscription_id:
         logger.error(
             "No subscription ID found in Table Storage (row key: '%s'). "
-            "Complete Step 7 to register the Graph subscription, then store "
+            "Register the Graph subscription, then store "
             "the returned subscription ID.",
             SUBSCRIPTION_ROW_KEY,
         )
@@ -153,7 +152,7 @@ def renew_subscription(timer: func.TimerRequest) -> None:
         if exc.response.status_code == 404:
             logger.error(
                 "Subscription %s not found on Graph — it has likely expired. "
-                "Re-register the subscription in Step 7, update the Table Storage "
+                "Re-register the subscription, update the Table Storage "
                 "row with the new subscription ID, and verify renewal is working.",
                 subscription_id,
             )

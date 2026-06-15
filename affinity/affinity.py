@@ -1,4 +1,4 @@
-from config import AFFINITY_API_KEY, AFFINITY_BASE, AFFINITY_FIELD_IDS, AFFINITY_LIST_ID, AFFINITY_FIELD_ID_STATUS_NEW
+from config import AFFINITY_API_KEY, AFFINITY_BASE, AFFINITY_FIELD_IDS, AFFINITY_LIST_ID, AFFINITY_STATUS_NEW
 
 import requests
 
@@ -32,13 +32,18 @@ def resolve_or_create_person(first_name: str, last_name: str, email: str) -> int
     if persons_list and len(persons_list) > 0:
         return persons_list[0]["id"]
         
+    body = {
+        "first_name": first_name,
+        "emails":     [email],
+    }
+    if last_name:  # only include if non-empty
+        body["last_name"] = last_name
+    else:
+        body["last_name"] = ""
+
     create_resp = requests.post(
         f"{AFFINITY_BASE}/persons",
-        json={
-            "first_name": first_name,
-            "last_name":  last_name,
-            "emails":     [email],
-        },
+        json=body,
         auth=affinity_auth(),
     )
     create_resp.raise_for_status()
@@ -59,18 +64,42 @@ def create_list_entry(person_id: int) -> int:
 
 
 def set_field_value(person_id: int, list_entry_id: int, field_id: str, value) -> None:
-    """Set a single custom field value on a list entry."""
-    resp = requests.post(
+    """Set a single custom field value on a list entry, updating if it already exists."""
+    
+    # Check for an existing value first
+    resp = requests.get(
         f"{AFFINITY_BASE}/field-values",
-        json={
-            "field_id":      int(field_id),
-            "entity_id":     person_id,      # <--- The missing piece!
-            "list_entry_id": list_entry_id,
-            "value":         value,
-        },
+        params={"list_entry_id": list_entry_id},
         auth=affinity_auth(),
     )
     resp.raise_for_status()
+    
+    existing = next(
+        (fv for fv in resp.json() if fv["field_id"] == int(field_id)),
+        None,
+    )
+    
+    if existing:
+        # PATCH the existing value
+        patch_resp = requests.patch(
+            f"{AFFINITY_BASE}/field-values/{existing['id']}",
+            json={"value": value},
+            auth=affinity_auth(),
+        )
+        patch_resp.raise_for_status()
+    else:
+        # POST a new value
+        post_resp = requests.post(
+            f"{AFFINITY_BASE}/field-values",
+            json={
+                "field_id":      int(field_id),
+                "entity_id":     person_id,
+                "list_entry_id": list_entry_id,
+                "value":         value,
+            },
+            auth=affinity_auth(),
+        )
+        post_resp.raise_for_status()
 
 
 def populate_affinity_entry(
@@ -81,11 +110,17 @@ def populate_affinity_entry(
     source: str,
     conversation_id: str,
 ) -> None:
-    """
-    Write all five custom field values to the list entry.
-    """
-    set_field_value(person_id, list_entry_id, AFFINITY_FIELD_IDS["message"],       message)
-    set_field_value(person_id, list_entry_id, AFFINITY_FIELD_IDS["date_received"], received_at)
-    set_field_value(person_id, list_entry_id, AFFINITY_FIELD_IDS["source"],        source)
-    set_field_value(person_id, list_entry_id, AFFINITY_FIELD_IDS["thread_id"],     conversation_id)
-    set_field_value(person_id, list_entry_id, AFFINITY_FIELD_IDS["status"], int(AFFINITY_FIELD_ID_STATUS_NEW))
+    # Fetch all existing field values for this list entry once
+    resp = requests.get(
+        f"{AFFINITY_BASE}/field-values",
+        params={"list_entry_id": list_entry_id},
+        auth=affinity_auth(),
+    )
+    resp.raise_for_status()
+    existing_values = {fv["field_id"]: fv["id"] for fv in resp.json()}
+
+    set_field_value(person_id, list_entry_id, AFFINITY_FIELD_IDS["message"],       message,         existing_values)
+    set_field_value(person_id, list_entry_id, AFFINITY_FIELD_IDS["date_received"], received_at,     existing_values)
+    set_field_value(person_id, list_entry_id, AFFINITY_FIELD_IDS["source"],        source,          existing_values)
+    set_field_value(person_id, list_entry_id, AFFINITY_FIELD_IDS["thread_id"],     conversation_id, existing_values)
+    set_field_value(person_id, list_entry_id, AFFINITY_FIELD_IDS["status"], int(AFFINITY_STATUS_NEW), existing_values)
