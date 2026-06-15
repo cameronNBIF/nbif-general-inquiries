@@ -15,6 +15,7 @@ logger = logging.getLogger(__name__)
 # Azure Function 1 — graphWebhook (HTTP Trigger)
 # ─────────────────────────────────────────────────────────────────────────────
 
+
 @app.route(
     route="graphWebhook",
     methods=["POST"],
@@ -96,19 +97,25 @@ def graph_webhook(req: func.HttpRequest) -> func.HttpResponse:
         except requests.HTTPError as exc:
             logger.error(
                 "HTTP error processing message %s: %s — %s",
-                message_id, exc.response.status_code, exc.response.text,
+                message_id,
+                exc.response.status_code,
+                exc.response.text,
             )
         except Exception as exc:
-            logger.exception("Unexpected error processing message %s: %s", message_id, exc)
+            logger.exception(
+                "Unexpected error processing message %s: %s", message_id, exc
+            )
 
     return func.HttpResponse(status_code=200)
+
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Azure Function 2 — renewSubscription (Timer Trigger)
 # ─────────────────────────────────────────────────────────────────────────────
 
+
 @app.timer_trigger(
-    schedule="0 0 0 */2 * *",   # midnight every 2 days (cron: s m h day-of-month month day-of-week)
+    schedule="0 0 0 */2 * *",  # midnight every 2 days (cron: s m h day-of-month month day-of-week)
     arg_name="timer",
     run_on_startup=False,
 )
@@ -142,11 +149,12 @@ def renew_subscription(timer: func.TimerRequest) -> None:
         return
 
     try:
-        token      = get_graph_token()
+        token = get_graph_token()
         new_expiry = renew_graph_subscription(token, subscription_id)
         logger.info(
             "Subscription %s successfully renewed. New expiry: %s",
-            subscription_id, new_expiry,
+            subscription_id,
+            new_expiry,
         )
     except requests.HTTPError as exc:
         if exc.response.status_code == 404:
@@ -159,7 +167,8 @@ def renew_subscription(timer: func.TimerRequest) -> None:
         else:
             logger.exception(
                 "HTTP error renewing subscription %s: %s",
-                subscription_id, exc,
+                subscription_id,
+                exc,
             )
     except Exception as exc:
         logger.exception(
