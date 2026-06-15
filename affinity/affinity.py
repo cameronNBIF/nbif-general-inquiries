@@ -63,33 +63,18 @@ def create_list_entry(person_id: int) -> int:
     return resp.json()["id"]
 
 
-def set_field_value(person_id: int, list_entry_id: int, field_id: str, value) -> None:
+def set_field_value(person_id: int, list_entry_id: int, field_id: str, value, existing_values: dict) -> None:
     """Set a single custom field value on a list entry, updating if it already exists."""
-    
-    # Check for an existing value first
-    resp = requests.get(
-        f"{AFFINITY_BASE}/field-values",
-        params={"list_entry_id": list_entry_id},
-        auth=affinity_auth(),
-    )
-    resp.raise_for_status()
-    
-    existing = next(
-        (fv for fv in resp.json() if fv["field_id"] == int(field_id)),
-        None,
-    )
-    
-    if existing:
-        # PATCH the existing value
-        patch_resp = requests.patch(
-            f"{AFFINITY_BASE}/field-values/{existing['id']}",
+    existing_id = existing_values.get(int(field_id))
+
+    if existing_id:
+        resp = requests.patch(
+            f"{AFFINITY_BASE}/field-values/{existing_id}",
             json={"value": value},
             auth=affinity_auth(),
         )
-        patch_resp.raise_for_status()
     else:
-        # POST a new value
-        post_resp = requests.post(
+        resp = requests.post(
             f"{AFFINITY_BASE}/field-values",
             json={
                 "field_id":      int(field_id),
@@ -99,7 +84,8 @@ def set_field_value(person_id: int, list_entry_id: int, field_id: str, value) ->
             },
             auth=affinity_auth(),
         )
-        post_resp.raise_for_status()
+
+    resp.raise_for_status()
 
 
 def populate_affinity_entry(
