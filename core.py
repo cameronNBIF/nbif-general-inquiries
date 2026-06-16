@@ -6,9 +6,8 @@ from affinity.affinity import (
     resolve_or_create_person,
 )
 from azure_table_storage.azure_table_storage import (
-    #conversation_exists,
-    #store_conversation,
-    try_claim_conversation,
+    conversation_exists,
+    store_conversation,
 )
 from config import FORM_SUBJECT_PREFIX
 from microsoft_graph.mail import (
@@ -78,16 +77,9 @@ def process_notification(token: str, message_id: str) -> None:
     )
 
     # Step 3 — Deduplicate
-    # if conversation_exists(conversation_id):
-    #     logger.info(
-    #         "conversationId %s already tracked — reply thread, skipping Affinity.",
-    #         conversation_id,
-    #     )
-    #     return
-    claimed = try_claim_conversation(conversation_id, sender_email, received_at)
-    if not claimed:
+    if conversation_exists(conversation_id):
         logger.info(
-            "conversationId %s already claimed — duplicate notification, skipping Affinity.",
+            "conversationId %s already tracked — reply thread, skipping Affinity.",
             conversation_id,
         )
         return
@@ -103,7 +95,7 @@ def process_notification(token: str, message_id: str) -> None:
 
     # If field population fails, the entry exists in Affinity and future
     # notifications for this thread won't create duplicates.
-    #store_conversation(conversation_id, sender_email, received_at)
+    store_conversation(conversation_id, sender_email, received_at)
     logger.info("conversationId %s stored in Table Storage.", conversation_id)
 
     logger.info(
