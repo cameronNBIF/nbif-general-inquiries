@@ -38,6 +38,16 @@ def try_claim_conversation(
         return True  # We won the race
     except ResourceExistsError:
         return False  # Another invocation already claimed this conversation
+    
+def release_conversation_claim(conversation_id: str) -> None:
+    """Delete a claimed conversationId row so the message can be retried."""
+    try:
+        get_table_client().delete_entity(
+            partition_key=TABLE_PARTITION_KEY,
+            row_key=conversation_id,
+        )
+    except ResourceNotFoundError:
+        pass  # nothing to do
 
 
 def conversation_exists(conversation_id: str) -> bool:

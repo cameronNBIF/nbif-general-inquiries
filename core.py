@@ -6,9 +6,8 @@ from affinity.affinity import (
     resolve_or_create_person,
 )
 from azure_table_storage.azure_table_storage import (
-    #conversation_exists,
-    #store_conversation,
-    try_claim_conversation,
+    release_conversation_claim,
+    try_claim_conversation
 )
 from config import FORM_SUBJECT_PREFIX
 from microsoft_graph.mail import (
@@ -78,12 +77,6 @@ def process_notification(token: str, message_id: str) -> None:
     )
 
     #Step 3 — Deduplicate
-    # if conversation_exists(conversation_id):
-    #     logger.info(
-    #         "conversationId %s already tracked — reply thread, skipping Affinity.",
-    #         conversation_id,
-    #     )
-    #     return
     claimed = try_claim_conversation(conversation_id, sender_email, received_at)
     if not claimed:
         logger.info(
@@ -92,19 +85,21 @@ def process_notification(token: str, message_id: str) -> None:
         )
         return
 
-    # Steps 4 & 5 — Affinity
-    first_name, last_name = split_display_name(sender_name)
-    person_id = resolve_or_create_person(first_name, last_name, sender_email)
-    list_entry_id = create_list_entry(person_id)
-
-    populate_affinity_entry(
-        person_id, list_entry_id, body_text, received_at, source, conversation_id
-    )
+    try:
+        #Steps 4-5 — Affinity population
+        first_name, last_name = split_display_name(sender_name)
+        person_id = resolve_or_create_person(first_name, last_name, sender_email)
+        list_entry_id = create_list_entry(person_id)
+        populate_affinity_entry(
+            person_id, list_entry_id, body_text, received_at, source, conversation_id
+        )
+    except Exception:
+        release_conversation_claim(conversation_id)  # new function in azure_table_storage.py
+        raise  # let function_app.py's error handler log it and Graph retry
 
     # If field population fails, the entry exists in Affinity and future
     # notifications for this thread won't create duplicates.
-    #store_conversation(conversation_id, sender_email, received_at)
-    logger.info("conversationId %s stored in Table Storage.", conversation_id)
+    logger.info("Affinity population complete for conversationId %s.", conversation_id)
 
     logger.info(
         "Affinity entry created | list_entry_id: %s | person: %s %s <%s> | source: %s",
