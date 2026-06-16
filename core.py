@@ -76,8 +76,15 @@ def process_notification(token: str, message_id: str) -> None:
         subject,
     )
 
-    # Step 3 — Deduplicate
-    if conversation_exists(conversation_id):
+    #Step 3 — Deduplicate
+    # if conversation_exists(conversation_id):
+    #     logger.info(
+    #         "conversationId %s already tracked — reply thread, skipping Affinity.",
+    #         conversation_id,
+    #     )
+    #     return
+    claimed = try_claim_conversation(conversation_id, sender_email, received_at)
+    if not claimed:
         logger.info(
             "conversationId %s already tracked — reply thread, skipping Affinity.",
             conversation_id,
