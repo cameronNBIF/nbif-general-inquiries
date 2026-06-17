@@ -1,5 +1,5 @@
 from azure_table_storage.client import get_table_client
-from azure.core.exceptions import ResourceNotFoundError, ResourceExistsError
+from azure.core.exceptions import ResourceNotFoundError
 from config import TABLE_PARTITION_KEY
 
 # ─────────────────────────────────────────────────────────────────────────────

@@ -8,6 +8,7 @@ from config import AZURE_CLIENT_ID, AZURE_CLIENT_SECRET, AZURE_TENANT_ID, GRAPH_
 
 _credential: ClientSecretCredential | None = None
 
+
 def _get_credential() -> ClientSecretCredential:
     global _credential
     if _credential is None:
@@ -17,6 +18,7 @@ def _get_credential() -> ClientSecretCredential:
             client_secret=AZURE_CLIENT_SECRET,
         )
     return _credential
+
 
 def get_graph_token() -> str:
     return _get_credential().get_token(GRAPH_SCOPE).token

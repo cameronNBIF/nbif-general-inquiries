@@ -1,5 +1,14 @@
-from affinity.client import affinity_auth, get_affinity_session
-from config import AFFINITY_BASE, AFFINITY_FIELD_IDS, AFFINITY_LIST_ID, AFFINITY_STATUS_NEW
+from affinity.client import get_affinity_session
+from config import (
+    AFFINITY_BASE,
+    AFFINITY_FIELD_IDS,
+    AFFINITY_LIST_ID,
+    AFFINITY_STATUS_NEW,
+)
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Affinity
+# ─────────────────────────────────────────────────────────────────────────────
 
 
 def set_field_value(
@@ -28,6 +37,7 @@ def set_field_value(
 
     resp.raise_for_status()
 
+
 def create_list_entry(person_id: int) -> int:
     """
     Add the resolved Person to the General Inquiries list.
@@ -41,6 +51,7 @@ def create_list_entry(person_id: int) -> int:
     )
     resp.raise_for_status()
     return resp.json()["id"]
+
 
 def populate_affinity_entry(
     person_id: int,

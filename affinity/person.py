@@ -5,6 +5,7 @@ from config import AFFINITY_BASE
 # Affinity
 # ─────────────────────────────────────────────────────────────────────────────
 
+
 def resolve_or_create_person(first_name: str, last_name: str, email: str) -> int:
     """
     Attempt to find an existing Person in Affinity by their email.

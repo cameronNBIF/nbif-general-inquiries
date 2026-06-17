@@ -31,7 +31,8 @@ def try_claim_conversation(
         return True
     except ResourceExistsError:
         return False  # Another invocation already claimed this conversation
-    
+
+
 def release_conversation_claim(conversation_id: str) -> None:
     """Delete a claimed conversationId row so the message can be retried."""
     try:
