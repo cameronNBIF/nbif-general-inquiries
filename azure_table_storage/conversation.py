@@ -1,11 +1,10 @@
 from azure_table_storage.client import get_table_client
 from azure.core.exceptions import ResourceNotFoundError, ResourceExistsError
-from config import TABLE_PARTITION_KEY
+from config import STORAGE_CONNECTION_STRING, STORAGE_TABLE_NAME, TABLE_PARTITION_KEY
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Azure Table Storage
 # ─────────────────────────────────────────────────────────────────────────────
-
 
 def try_claim_conversation(
     conversation_id: str, sender_email: str, received_at: str
@@ -27,7 +26,7 @@ def try_claim_conversation(
         "ReceivedAt": received_at,
     }
     try:
-        get_table_client().create_entity(entity=entity)
+        get_table_client(STORAGE_CONNECTION_STRING, STORAGE_TABLE_NAME).create_entity(entity=entity)
         return True
     except ResourceExistsError:
         return False  # Another invocation already claimed this conversation
@@ -36,7 +35,7 @@ def try_claim_conversation(
 def release_conversation_claim(conversation_id: str) -> None:
     """Delete a claimed conversationId row so the message can be retried."""
     try:
-        get_table_client().delete_entity(
+        get_table_client(STORAGE_CONNECTION_STRING, STORAGE_TABLE_NAME).delete_entity(
             partition_key=TABLE_PARTITION_KEY,
             row_key=conversation_id,
         )

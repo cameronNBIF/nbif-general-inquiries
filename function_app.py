@@ -2,7 +2,7 @@ import logging
 import azure.functions as func
 import requests
 
-from azure_table_storage.azure_table_storage import get_stored_value
+from azure_table_storage.value import get_stored_value
 from config import GRAPH_WEBHOOK_SECRET, SUBSCRIPTION_ROW_KEY
 from core import process_notification
 from microsoft_graph.authentication import get_graph_token

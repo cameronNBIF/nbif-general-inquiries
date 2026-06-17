@@ -1,6 +1,6 @@
 from azure_table_storage.client import get_table_client
 from azure.core.exceptions import ResourceNotFoundError
-from config import TABLE_PARTITION_KEY
+from config import STORAGE_CONNECTION_STRING, STORAGE_TABLE_NAME, TABLE_PARTITION_KEY
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Azure Table Storage
@@ -14,7 +14,7 @@ def get_stored_value(row_key: str) -> str | None:
     Returns None if the row does not exist.
     """
     try:
-        entity = get_table_client().get_entity(
+        entity = get_table_client(STORAGE_CONNECTION_STRING, STORAGE_TABLE_NAME).get_entity(
             partition_key=TABLE_PARTITION_KEY,
             row_key=row_key,
         )
@@ -30,4 +30,4 @@ def store_value(row_key: str, value: str) -> None:
         "RowKey": row_key,
         "Value": value,
     }
-    get_table_client().upsert_entity(entity=entity)
+    get_table_client(STORAGE_CONNECTION_STRING, STORAGE_TABLE_NAME).upsert_entity(entity=entity)

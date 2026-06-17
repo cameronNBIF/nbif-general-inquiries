@@ -1,15 +1,15 @@
 import logging
 
-from affinity.affinity import (
-    create_list_entry,
-    populate_affinity_entry,
-    resolve_or_create_person,
-)
-from azure_table_storage.azure_table_storage import (
-    release_conversation_claim,
-    try_claim_conversation,
-)
 from config import FORM_SUBJECT_PREFIX
+from affinity.person import resolve_or_create_person
+from affinity.entry import (
+    create_list_entry, 
+    populate_affinity_entry
+)
+from azure_table_storage.conversation import (
+    release_conversation_claim,
+    try_claim_conversation
+)
 from microsoft_graph.mail import (
     fetch_message,
     parse_body,
@@ -76,7 +76,7 @@ def process_notification(token: str, message_id: str) -> None:
         subject,
     )
 
-    # Step 3 — Deduplicate
+    #Step 3 — Deduplicate
     claimed = try_claim_conversation(conversation_id, sender_email, received_at)
     if not claimed:
         logger.info(
@@ -86,7 +86,7 @@ def process_notification(token: str, message_id: str) -> None:
         return
 
     try:
-        # Steps 4-5 — Affinity population
+        #Steps 4-5 — Affinity population
         first_name, last_name = split_display_name(sender_name)
         person_id = resolve_or_create_person(first_name, last_name, sender_email)
         list_entry_id = create_list_entry(person_id)
@@ -94,9 +94,7 @@ def process_notification(token: str, message_id: str) -> None:
             person_id, list_entry_id, body_text, received_at, source, conversation_id
         )
     except Exception:
-        release_conversation_claim(
-            conversation_id
-        )  # new function in azure_table_storage.py
+        release_conversation_claim(conversation_id)
         raise  # let function_app.py's error handler log it and Graph retry
 
     # If field population fails, the entry exists in Affinity and future
