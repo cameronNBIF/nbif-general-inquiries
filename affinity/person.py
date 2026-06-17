@@ -1,18 +1,21 @@
-import requests
-
-from affinity.client import affinity_auth
+from affinity.client import get_affinity_session
 from config import AFFINITY_BASE
 
+# ─────────────────────────────────────────────────────────────────────────────
+# Affinity
+# ─────────────────────────────────────────────────────────────────────────────
 
 def resolve_or_create_person(first_name: str, last_name: str, email: str) -> int:
     """
     Attempt to find an existing Person in Affinity by their email.
     If they do not exist, create a new Person.
     """
-    search_resp = requests.get(
+
+    session = get_affinity_session()
+
+    search_resp = session.get(
         f"{AFFINITY_BASE}/persons",
         params={"term": email},
-        auth=affinity_auth(),
     )
     search_resp.raise_for_status()
 
@@ -32,10 +35,9 @@ def resolve_or_create_person(first_name: str, last_name: str, email: str) -> int
     else:
         body["last_name"] = ""
 
-    create_resp = requests.post(
+    create_resp = session.post(
         f"{AFFINITY_BASE}/persons",
         json=body,
-        auth=affinity_auth(),
     )
     create_resp.raise_for_status()
     return create_resp.json()["id"]

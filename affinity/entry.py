@@ -1,5 +1,4 @@
-import requests
-from affinity.client import affinity_auth
+from affinity.client import affinity_auth, get_affinity_session
 from config import AFFINITY_BASE, AFFINITY_FIELD_IDS, AFFINITY_LIST_ID, AFFINITY_STATUS_NEW
 
 
@@ -9,14 +8,15 @@ def set_field_value(
     """Set a single custom field value on a list entry, updating if it already exists."""
     existing_id = existing_values.get(int(field_id))
 
+    session = get_affinity_session()
+
     if existing_id:
-        resp = requests.put(
+        resp = session.put(
             f"{AFFINITY_BASE}/field-values/{existing_id}",
             json={"value": value},
-            auth=affinity_auth(),
         )
     else:
-        resp = requests.post(
+        resp = session.post(
             f"{AFFINITY_BASE}/field-values",
             json={
                 "field_id": int(field_id),
@@ -24,7 +24,6 @@ def set_field_value(
                 "list_entry_id": list_entry_id,
                 "value": value,
             },
-            auth=affinity_auth(),
         )
 
     resp.raise_for_status()
@@ -33,10 +32,12 @@ def create_list_entry(person_id: int) -> int:
     """
     Add the resolved Person to the General Inquiries list.
     """
-    resp = requests.post(
+
+    session = get_affinity_session()
+
+    resp = session.post(
         f"{AFFINITY_BASE}/lists/{AFFINITY_LIST_ID}/list-entries",
         json={"entity_id": person_id},
-        auth=affinity_auth(),
     )
     resp.raise_for_status()
     return resp.json()["id"]
@@ -50,10 +51,12 @@ def populate_affinity_entry(
     conversation_id: str,
 ) -> None:
     # Fetch all existing field values for this list entry once
-    resp = requests.get(
+
+    session = get_affinity_session()
+
+    resp = session.get(
         f"{AFFINITY_BASE}/field-values",
         params={"list_entry_id": list_entry_id},
-        auth=affinity_auth(),
     )
     resp.raise_for_status()
     existing_values = {fv["field_id"]: fv["id"] for fv in resp.json()}
